@@ -2,7 +2,7 @@
 
 A broadcaster liblary for [actix-ws](https://crates.io/crates/actix-ws) that includes grouping and conditional broadcasting.
 
-This liblary provides grouping and broadcasting mechanism for brand new websocket liblary of Actix-Web Ecosystem. You have individual `Connection`s for each `Session` implementation of [actix-ws](https://crates.io/crates/actix-ws), will be identified as the given id. And there is also rooms exist, which benefits to group related connections on a single entity.
+This liblary provides grouping and broadcasting mechanism for brand new websocket liblary of Actix-Web Ecosystem. You have individual `Connection` for each `Session` implementation of [actix-ws](https://crates.io/crates/actix-ws), will be identified as the given id. And there is also rooms exist, which benefits to group related connections on a single entity.
 
 ## Guide
 
@@ -25,6 +25,10 @@ use actix_wsb::Broadcaster;
 ```
 
 ### Initialize
+
+The best way to initialize the broadcaster is initialize it
+in entry point of the app and share it via `HashMap`, `web::Data`,
+etc.
 
 ```rust
 
