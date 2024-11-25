@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 keywords = ["websocket", "broadcasting", "actix", "web", "streaming"]
 categories = ["web-programming::websocket", "network-programming"]
-description = "A broadcasting liblary for actix-ws"
+description = "A broadcaster liblary for actix-ws that includes grouping and conditional broadcasting."
 
 [dependencies]
 actix-ws = "0.3.0"

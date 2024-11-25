@@ -1,6 +1,6 @@
 # Actix-Web Broadcaster
 
-A broadcasting liblary for [actix-ws](https://crates.io/crates/actix-ws) crate.
+A broadcaster liblary for [actix-ws](https://crates.io/crates/actix-ws) that includes grouping and conditional broadcasting.
 
 This liblary provides grouping and broadcasting mechanism for brand new websocket liblary of Actix-Web Ecosystem. You have individual `Connection`s for each `Session` implementation of [actix-ws](https://crates.io/crates/actix-ws), will be identified as the given id. And there is also rooms exist, which benefits to group related connections on a single entity.
 
