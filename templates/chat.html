@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+</head>
+<body>
+    <input type="message" placeholder="send chat" class="message-input">
+    <input type="submit" value="send" class="send-chat-button">
+
+    <div class="chats">
+
+    </div>
+
+    <style>
+        .messages {
+            min-width: 100px;
+            height: 50px;
+            color: white;
+            margin: 10px 0;
+            border-radius: 20px;
+        }
+
+        .my-message {
+            background-color: black;
+        }
+
+        .other-message {
+            background-color: blue;
+        }
+    </style>
+
+<script> 
+    const chats = document.querySelector(".chats"); 
+    const send = document.querySelector(".send-chat-button"); 
+    const messageInput = document.querySelector(".message-input");  
+    const query = new URLSearchParams(window.location.search); 
+
+    /* Note: That configuration doesn't work on chromium based browsers,
+       Because they don't let you to send query parameters to websocket 
+       routes with Websocket Api. You should try it on firefox based 
+       browsers, such as firefox, librewolf etc. */
+       
+    let websocketUrl = `ws://localhost:5000/chats?name=${query.get("name")}&id=${query.get("id")}&room=${query.get("room")}`
+
+    let websocket = new WebSocket(websocketUrl, ["soap", "wamp"]);
+
+    websocket.addEventListener("open", function() { 
+        console.log("WebSocket is open!"); 
+    }); 
+
+    websocket.addEventListener("message", function(event) { 
+        const message = JSON.parse(event.data); 
+        const newParagraph = document.createElement("p"); 
+        newParagraph.textContent = message.name + ": " + message.message; 
+        newParagraph.classList.add("messages"); 
+        
+        if (message.id === query.get("id")) { 
+            newParagraph.classList.add("my-message"); 
+        } else { 
+            newParagraph.classList.add("other-message"); 
+        } 
+        
+        chats.append(newParagraph); 
+    }); 
+    
+    websocket.addEventListener("close", function(event) { 
+        console.log("WebSocket closed: ", event); 
+        console.log("is event bubbled: ", event.bubbles);
+        console.log("is event composed: ", event.composed);
+        console.log(`Code: ${event.code}, Reason: ${event.reason}`); 
+    }); 
+    
+    websocket.addEventListener("error", function(event) { 
+        console.error("WebSocket error: ", event); 
+    }); 
+
+    document.addEventListener("beforeunload", function(){
+        websocket.close();
+    })
+    
+    send.addEventListener("click", function() { 
+        const message = { 
+            name: query.get("name"), 
+            id: query.get("id"), 
+            message: messageInput.value 
+        }; 
+        
+        websocket.send(JSON.stringify(message)); 
+        
+        messageInput.value = ""; 
+    }); 
+</script>
+</body>
+</html>
