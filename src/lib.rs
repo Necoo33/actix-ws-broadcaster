@@ -88,7 +88,7 @@ impl Room {
     }
 
     /// broadcastes the message to all room connectors.
-    pub async fn broadcast(&mut self, message: String) { 
+    pub async fn broadcast(&mut self, message: String) {
         for connection in &mut self.connectors { 
             let message = message.clone(); 
             let session = &mut connection.session; 
@@ -115,6 +115,38 @@ impl Room {
                 let message = message.clone(); 
                 let session = &mut connection.session; 
                 let _ = session.text(message).await;
+            } 
+        } 
+    }
+
+    /// broadcastes the ping to all room connectors.
+    pub async fn ping(&mut self, bytes: Vec<u8>) { 
+        for connection in &mut self.connectors { 
+            let message = &bytes; 
+            let session = &mut connection.session; 
+                
+            let _ = session.ping(message).await;
+        }
+    }
+
+    /// broadcastes the ping if given condition for connection instances is true.
+    pub async fn ping_if<F>(&mut self, bytes: Vec<u8>, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if condition(connection) { 
+                let message = &bytes; 
+                let session = &mut connection.session; 
+                let _ = session.ping(message).await;
+            } 
+        } 
+    }
+
+    /// broadcastes the message if given condition for connection instances is false.
+    pub async fn ping_if_not<F>(&mut self, bytes: Vec<u8>, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if !condition(connection) { 
+                let message = &bytes; 
+                let session = &mut connection.session; 
+                let _ = session.ping(message).await;
             } 
         } 
     }

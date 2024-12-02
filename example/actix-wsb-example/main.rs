@@ -66,6 +66,11 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
                     
                     break;
                  },
+                 Message::Pong(bytes) => {
+                    let mut write_broadcaster = get_broadcaster.write().unwrap();
+
+                    write_broadcaster.room(room_id.clone()).ping(bytes.to_vec()).await;
+                 }
                  _ => ()
             }
         }
