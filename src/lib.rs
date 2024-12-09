@@ -140,13 +140,45 @@ impl Room {
         } 
     }
 
-    /// broadcastes the message if given condition for connection instances is false.
+    /// broadcastes the ping if given condition for connection instances is false.
     pub async fn ping_if_not<F>(&mut self, bytes: Vec<u8>, condition: F) where F: Fn(&Connection) -> bool { 
         for connection in &mut self.connectors { 
             if !condition(connection) { 
                 let message = &bytes; 
                 let session = &mut connection.session; 
                 let _ = session.ping(message).await;
+            } 
+        } 
+    }
+
+    /// broadcastes the pong to all room connectors.
+    pub async fn pong(&mut self, bytes: Vec<u8>) { 
+        for connection in &mut self.connectors { 
+            let message = &bytes; 
+            let session = &mut connection.session; 
+                
+            let _ = session.pong(message).await;
+        }
+    }
+
+    /// broadcastes the pong if given condition for connection instances is true.
+    pub async fn pong_if<F>(&mut self, bytes: Vec<u8>, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if condition(connection) { 
+                let message = &bytes; 
+                let session = &mut connection.session; 
+                let _ = session.pong(message).await;
+            } 
+        } 
+    }
+
+    /// broadcastes the pong if given condition for connection instances is false.
+    pub async fn pong_if_not<F>(&mut self, bytes: Vec<u8>, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if !condition(connection) { 
+                let message = &bytes; 
+                let session = &mut connection.session; 
+                let _ = session.pong(message).await;
             } 
         } 
     }
@@ -226,6 +258,10 @@ impl Broadcaster {
         for room in &mut self.rooms {
             if let Some(pos) = room.connectors.iter().position(|connection| connection.id == id) {
                 let connection = room.connectors.remove(pos);
+                
+                /*let _ = async {
+                    let _ = connection.session.close(None).await;
+                };*/
                 return Some(connection.session);
             }
         }

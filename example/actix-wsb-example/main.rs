@@ -70,7 +70,12 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
                     let mut write_broadcaster = get_broadcaster.write().unwrap();
 
                     write_broadcaster.room(room_id.clone()).ping(bytes.to_vec()).await;
-                 }
+                 },
+                 Message::Ping(bytes) => {
+                    let mut write_broadcaster = get_broadcaster.write().unwrap();
+
+                    write_broadcaster.room(room_id.clone()).pong(bytes.to_vec()).await;
+                 },
                  _ => ()
             }
         }

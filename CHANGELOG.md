@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.3.0
+
+Added `.pong()`, `.pong_if()` and `.pong_if_not()` methods to `Room` Type. It benefits to send a ping message to sessions.
+
 ## v0.2.0
 
 Added `.ping()`, `.ping_if()` and `.ping_if_not()` methods to `Room` Type. It benefits to send a ping message to sessions.
