@@ -1,6 +1,6 @@
 use std::sync::{Arc, RwLock};
-
 use actix_ws::Session;
+use actix_web::web::Bytes;
 
 #[derive(Clone)]
 pub struct Connection {
@@ -179,6 +179,38 @@ impl Room {
                 let message = &bytes; 
                 let session = &mut connection.session; 
                 let _ = session.pong(message).await;
+            } 
+        } 
+    }
+
+    /// Broadcastes the raw binary bytes to all room connectors.
+    pub async fn binary(&mut self, bytes: Bytes) { 
+        for connection in &mut self.connectors { 
+            let message = bytes.clone();
+            let session = &mut connection.session; 
+                
+            let _ = session.binary(message).await;
+        }
+    }
+
+    /// broadcastes the raw binary bytes if given condition for connection instances is true.
+    pub async fn binary_if<F>(&mut self, bytes: Bytes, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if condition(connection) { 
+                let message = bytes.clone(); 
+                let session = &mut connection.session; 
+                let _ = session.binary(message).await;
+            } 
+        } 
+    }
+
+    /// broadcastes the raw binary bytes if given condition for connection instances is false.
+    pub async fn binary_if_not<F>(&mut self, bytes: Bytes, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if !condition(connection) { 
+                let message = bytes.clone(); 
+                let session = &mut connection.session; 
+                let _ = session.binary(message).await;
             } 
         } 
     }

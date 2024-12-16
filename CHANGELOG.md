@@ -1,8 +1,12 @@
 # CHANGELOG
 
+## v0.4.0
+
+Added `.binary()`, `.binary_if()` and `.binary_if_not()` methods to `Room` Type. It benefits to send raw binary bytes to sessions.
+
 ## v0.3.0
 
-Added `.pong()`, `.pong_if()` and `.pong_if_not()` methods to `Room` Type. It benefits to send a ping message to sessions.
+Added `.pong()`, `.pong_if()` and `.pong_if_not()` methods to `Room` Type. It benefits to send a pong message to sessions.
 
 ## v0.2.0
 
