@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.5.0
+
+Added `.continuation()`, `.continuation_if()` and `.continuation_if_not()` methods to `Room` Type. It benefits to send big chunks continuously to sessions.
+
 ## v0.4.0
 
 Added `.binary()`, `.binary_if()` and `.binary_if_not()` methods to `Room` Type. It benefits to send raw binary bytes to sessions.

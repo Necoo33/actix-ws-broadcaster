@@ -1,5 +1,5 @@
 use std::sync::{Arc, RwLock};
-use actix_ws::Session;
+use actix_ws::{Session, Item};
 use actix_web::web::Bytes;
 
 #[derive(Clone)]
@@ -211,6 +211,88 @@ impl Room {
                 let message = bytes.clone(); 
                 let session = &mut connection.session; 
                 let _ = session.binary(message).await;
+            } 
+        } 
+    }
+
+    /// Broadcastes the continuation message to all room connectors.
+    pub async fn continuation(&mut self, item: Item) { 
+        for connection in &mut self.connectors { 
+            let session = &mut connection.session; 
+
+            match item {
+                Item::FirstText(ref text) => {
+                    let text = text;
+                    session.continuation(Item::FirstText(text.clone())).await.unwrap()
+                },
+                Item::FirstBinary(ref binary) => {
+                    let binary = binary;
+                    session.continuation(Item::FirstBinary(binary.clone())).await.unwrap()
+                },
+                Item::Continue(ref cont_msg) => {
+                    let cont_msg = cont_msg;
+                    session.continuation(Item::Continue(cont_msg.clone())).await.unwrap()
+                },
+                Item::Last(ref last_msg) => {
+                    let last_msg = last_msg;
+                    session.continuation(Item::Last(last_msg.clone())).await.unwrap()
+                }
+            }
+        }
+    }
+
+    /// broadcastes the continuation messages if given condition for connection instances is true.
+    pub async fn continuation_if<F>(&mut self, item: Item, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if condition(connection) { 
+                let session = &mut connection.session; 
+
+                match item {
+                    Item::FirstText(ref text) => {
+                        let text = text;
+                        session.continuation(Item::FirstText(text.clone())).await.unwrap()
+                    },
+                    Item::FirstBinary(ref binary) => {
+                        let binary = binary;
+                        session.continuation(Item::FirstBinary(binary.clone())).await.unwrap()
+                    },
+                    Item::Continue(ref cont_msg) => {
+                        let cont_msg = cont_msg;
+                        session.continuation(Item::Continue(cont_msg.clone())).await.unwrap()
+                    },
+                    Item::Last(ref last_msg) => {
+                        let last_msg = last_msg;
+                        session.continuation(Item::Last(last_msg.clone())).await.unwrap()
+                    }
+                }
+            } 
+        } 
+    }
+
+    /// broadcastes the continuation messages if given condition for connection instances is false.
+    pub async fn continuation_if_not<F>(&mut self, item: Item, condition: F) where F: Fn(&Connection) -> bool { 
+        for connection in &mut self.connectors { 
+            if !condition(connection) { 
+                let session = &mut connection.session; 
+    
+                match item {
+                    Item::FirstText(ref text) => {
+                        let text = text;
+                        session.continuation(Item::FirstText(text.clone())).await.unwrap()
+                    },
+                    Item::FirstBinary(ref binary) => {
+                        let binary = binary;
+                        session.continuation(Item::FirstBinary(binary.clone())).await.unwrap()
+                    },
+                    Item::Continue(ref cont_msg) => {
+                        let cont_msg = cont_msg;
+                        session.continuation(Item::Continue(cont_msg.clone())).await.unwrap()
+                    },
+                    Item::Last(ref last_msg) => {
+                        let last_msg = last_msg;
+                        session.continuation(Item::Last(last_msg.clone())).await.unwrap()
+                    }
+                }
             } 
         } 
     }

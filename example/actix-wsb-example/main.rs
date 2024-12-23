@@ -1,10 +1,10 @@
-use actix_web::{web::{get, Data, Query, Payload}, rt::spawn, App, HttpResponse, HttpRequest, HttpServer, Responder};
+use actix_web::{rt::spawn, web::{get, Data, Payload, Query}, App, HttpRequest, HttpResponse, HttpServer, Responder};
 
 use actix_wsb::Broadcaster;
 use askama::Template;
 use serde;
 use std::sync::{Arc, RwLock};
-use actix_ws::Message;
+use actix_ws::{Item, Message};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -76,6 +76,23 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
 
                     write_broadcaster.room(room_id.clone()).pong(bytes.to_vec()).await;
                  },
+                 Message::Continuation(item) => {
+                    let mut write_broadcaster = get_broadcaster.write().unwrap();
+
+                    let room = write_broadcaster.room(room_id.clone());
+
+                    let msg = format!(r"hello, your continuation message: {:#?}", item);
+                    
+                    let start = Item::FirstBinary(msg.into());
+                    let _ = room.continuation(start).await;
+
+                    let cont_cont = Item::Continue(r"continue".into());
+                    let _ = room.continuation(cont_cont).await;
+
+                    let last = Item::Last(r"end".into());
+                    let _ = room.continuation(last);
+
+                 }
                  _ => ()
             }
         }
