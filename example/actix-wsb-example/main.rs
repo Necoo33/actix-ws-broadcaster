@@ -52,6 +52,8 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
     let room_id = query.room.as_ref().unwrap().to_string();
 
     let get_broadcaster = Broadcaster::handle(&broadcaster, room_id.clone(), id.clone(), session);
+
+    println!("length of the connectors: {:#?}", get_broadcaster.read().unwrap().rooms[0].connectors.len());
     
     spawn(async move {
         while let Some(Ok(msg)) = msg_stream.recv().await {
@@ -62,7 +64,13 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
                     write_broadcaster.room(room_id.clone()).broadcast(msg.to_string()).await;
                 },
                  Message::Close(reason) => {
-                    let _ = get_broadcaster.write().unwrap().remove_connection(id).unwrap().close(reason).await;
+                    // warning, that closes and removes all the connections but not removes the room: 
+                    //let _ = get_broadcaster.write().unwrap().room(room_id.clone()).close(reason).await;
+                    
+                    // if you want to remove a room with removing all the connections, use this instead:
+                    // let _ = get_broadcaster.write().unwrap().remove_room(room_id.clone()).await;
+
+                    let _ = get_broadcaster.write().unwrap().room(room_id.clone()).close_if(reason, |conn| conn.id == query.id.clone().unwrap()).await;
                     
                     break;
                  },

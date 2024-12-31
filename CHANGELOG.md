@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.6.0
+
+Added `.close()`, `.close_if()` and `.close_if_not()` methods to `Room` type. If you close all connections, it removes all the connections from room but don't removes the room. If you want to also remove rooms with all the inner connections, use `.remove_room()` method of `Broadcaster` instead.
+
 ## v0.5.0
 
 Added `.continuation()`, `.continuation_if()` and `.continuation_if_not()` methods to `Room` Type. It benefits to send big chunks continuously to sessions.

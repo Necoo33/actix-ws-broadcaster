@@ -9,6 +9,7 @@
 <body>
     <input type="message" placeholder="send chat" class="message-input">
     <input type="submit" value="send" class="send-chat-button">
+    <button class="close-button">Close</button>
 
     <div class="chats">
 
@@ -37,6 +38,7 @@
     const send = document.querySelector(".send-chat-button"); 
     const messageInput = document.querySelector(".message-input");  
     const query = new URLSearchParams(window.location.search); 
+    const closeButton = document.querySelector(".close-button");
 
     /* Note: That configuration doesn't work on chromium based browsers,
        Because they don't let you to send query parameters to websocket 
@@ -92,6 +94,10 @@
         
         messageInput.value = ""; 
     }); 
+
+    closeButton.addEventListener("click", function(){
+        websocket.close(1000, "Because why not?");
+    })
 </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 use std::sync::{Arc, RwLock};
-use actix_ws::{Session, Item};
+use actix_ws::{CloseReason, Item, Session};
 use actix_web::web::Bytes;
 
 #[derive(Clone)]
@@ -296,6 +296,53 @@ impl Room {
             } 
         } 
     }
+
+    /// closes all the connections and entire room. Warning: it's a private function, if you want to close all the connections directly, use the `.remove_room()` method of the Broadcaster struct instead.
+    pub async fn close(&mut self, reason: Option<CloseReason>) {
+        self.connectors.retain(|conn| {
+            let reason = reason.clone();
+                
+            let _ = async {
+                let _ = conn.session.clone().close(reason).await;
+            };
+
+            false
+        });
+    }
+    
+    /// closes the connection and removes it from room if given condition for connection instances is true.
+    pub async fn close_if<F>(&mut self, reason: Option<CloseReason>, condition: F) where F: Fn(&Connection) -> bool { 
+        self.connectors.retain(|connection| {
+            if condition(connection) {
+                let reason = reason.clone();
+                
+                let _ = async {
+                    let _ = connection.session.clone().close(reason).await;
+                };
+    
+                false
+            } else {
+                true
+            }
+        });
+    }
+    
+    /// closes the connection and removes it from room if given condition for connection instances is false.
+    pub async fn close_if_not<F>(&mut self, reason: Option<CloseReason>, condition: F) where F: Fn(&Connection) -> bool { 
+        self.connectors.retain(|connection| {
+            if !condition(connection) {
+                let reason = reason.clone();
+                
+                let _ = async {
+                    let _ = connection.session.clone().close(reason).await;
+                };
+    
+                false
+            } else {
+                true
+            }
+        });
+    }
 }
 
 impl Broadcaster {
@@ -346,9 +393,13 @@ impl Broadcaster {
     }
 
     /// it removes a room with given id.
-    pub fn remove_room(&mut self, id: String) {
+    pub async fn remove_room(&mut self, id: String) {
         self.rooms.retain(|room| { 
             if room.id == id { 
+                let _ = async {
+                    room.clone().close(None).await;
+                };
+                
                 false 
             } else { 
                 true 
