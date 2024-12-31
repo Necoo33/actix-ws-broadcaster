@@ -107,11 +107,15 @@ If a client disconnects, you should remove their assigned connection by that cod
 ```rust
 
 Message::Close(reason) => {
-    // because the async closures are not stable yet, 
-    // we have to remove connections with explicitly 
-    // calling .close() method.
-    let _ = broadcaster.write().unwrap().remove_connection(id).unwrap().close(reason).await;
+    // warning, that closes and removes all the connections but not removes the room: 
+    let _ = get_broadcaster.write().unwrap().room(room_id.clone()).close(reason).await;
 
+    // if you want to remove a room with removing all the connections, use this instead:
+    let _ = get_broadcaster.write().unwrap().remove_room(room_id.clone()).await;
+
+    // warning, this is the old and deprecated way:
+    let _ = broadcaster.write().unwrap().remove_connection(id).unwrap().close(reason).await;
+    
     // stop listening messages and break the loop if 
     // a connection is removed.
     break;

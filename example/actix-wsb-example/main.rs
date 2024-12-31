@@ -52,8 +52,6 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
     let room_id = query.room.as_ref().unwrap().to_string();
 
     let get_broadcaster = Broadcaster::handle(&broadcaster, room_id.clone(), id.clone(), session);
-
-    println!("length of the connectors: {:#?}", get_broadcaster.read().unwrap().rooms[0].connectors.len());
     
     spawn(async move {
         while let Some(Ok(msg)) = msg_stream.recv().await {

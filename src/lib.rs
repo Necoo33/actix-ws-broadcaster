@@ -352,6 +352,16 @@ impl Broadcaster {
     }
 
     /// does all the setup basically. You don't have to use other functions for all the grouping of rooms and connections. You can give the same room id for all instances if you don't want to seperate communication groups. But you have to give different connection id's to each session, otherwise it'll introduce bugs.
+    ///     let id = query.id.as_ref().unwrap().to_string();
+    /// 
+    ///```rust
+    /// 
+    /// let id = query.id.as_ref().unwrap().to_string();
+    /// let room_id = query.room.as_ref().unwrap().to_string();
+    ///
+    /// let get_broadcaster = Broadcaster::handle(&broadcaster, room_id.clone(), id.clone(), session);
+    /// 
+    ///```
     pub fn handle(broadcaster: &Arc<RwLock<Self>>, room_id: String, conn_id: String, session: Session) -> Arc<RwLock<Self>> {
         let mut broadcaster_write = broadcaster.write().unwrap();
 
@@ -361,6 +371,15 @@ impl Broadcaster {
     }
     
     /// this function check if a room exist and if it's exist returns it, if it's not then creates it. If you just want to check if a room exist, use .check() instead.
+    /// 
+    ///```rust
+    /// 
+    /// let mut broadcaster_write = broadcaster.write().unwrap();
+    ///
+    /// broadcaster_write.handle_room(room_id)
+    /// 
+    ///```
+    /// 
     pub fn handle_room(&mut self, id: String) -> &mut Room {
         if let Some(index) = self.rooms.iter().position(|room| room.id == id) {
             return &mut self.rooms[index];
@@ -393,6 +412,24 @@ impl Broadcaster {
     }
 
     /// it removes a room with given id.
+    /// 
+    /// 
+    /// ```rust 
+    /// Message::Close(reason) => {
+    ///     // warning, that closes and removes all the connections but not removes the room: 
+    ///     //let _ = get_broadcaster.write().unwrap().room(room_id.clone()).close(reason).await;
+    ///                
+    ///     // if you want to remove a room with removing all the connections, use this instead:
+    ///     // let _ = get_broadcaster.write().unwrap().remove_room(room_id.clone()).await;
+    ///
+    ///     let _ = get_broadcaster.write().unwrap()
+    ///                                    .room(room_id.clone())
+    ///                                    .close_if(reason, |conn| conn.id == query.id.clone().unwrap()).await;
+    ///                
+    ///     break;
+    ///  },
+    /// ```
+    ///
     pub async fn remove_room(&mut self, id: String) {
         self.rooms.retain(|room| { 
             if room.id == id { 
@@ -419,14 +456,12 @@ impl Broadcaster {
     }
 
     /// it removes a connection and returns the session struct of it. since async closures not stable yet, we cannot close the actual "Session" implementation in that method. For making that cleanup, we have to get actual Session implementation and close that connection manually - check out the example and readme.
+    /// This is the old way of removing connections. It'll not be removed but we don't recommend to use it unless you don't used it yet.
     pub fn remove_connection(&mut self, id: String) -> Option<Session> {
         for room in &mut self.rooms {
             if let Some(pos) = room.connectors.iter().position(|connection| connection.id == id) {
                 let connection = room.connectors.remove(pos);
                 
-                /*let _ = async {
-                    let _ = connection.session.close(None).await;
-                };*/
                 return Some(connection.session);
             }
         }
