@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.7.0
+
+Added `.close_conn()` method to the `Room` type. Arguments of that methods are changed, now they take `&String` rather than `String`: `.add_connection()` and `.check_connection()` methods of `Room` type and `handle()` constructor, `.handle_room()`, `.room()`, `.check_room()` methods of ``Broadcaster` type.
+
 ## v0.6.1
 
 Documentation update. Added more comprehensive documentation and some deprecated things removed.

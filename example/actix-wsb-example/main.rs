@@ -51,7 +51,7 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
     let id = query.id.as_ref().unwrap().to_string();
     let room_id = query.room.as_ref().unwrap().to_string();
 
-    let get_broadcaster = Broadcaster::handle(&broadcaster, room_id.clone(), id.clone(), session);
+    let get_broadcaster = Broadcaster::handle(&broadcaster, &room_id, &id, session);
     
     spawn(async move {
         while let Some(Ok(msg)) = msg_stream.recv().await {
@@ -59,7 +59,7 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
                 Message::Text(msg) => {
                     let mut write_broadcaster = get_broadcaster.write().unwrap();
 
-                    write_broadcaster.room(room_id.clone()).broadcast(msg.to_string()).await;
+                    write_broadcaster.room(&room_id).broadcast(msg.to_string()).await;
                 },
                  Message::Close(reason) => {
                     // warning, that closes and removes all the connections but not removes the room: 
@@ -68,24 +68,28 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
                     // if you want to remove a room with removing all the connections, use this instead:
                     // let _ = get_broadcaster.write().unwrap().remove_room(room_id.clone()).await;
 
-                    let _ = get_broadcaster.write().unwrap().room(room_id.clone()).close_if(reason, |conn| conn.id == query.id.clone().unwrap()).await;
+                    // you can conditionally close connections:
+                    //let _ = get_broadcaster.write().unwrap().room(room_id.clone()).close_if(reason, |conn| conn.id == query.id.clone().unwrap()).await;
                     
+                    // or, use the new api:
+
+                    let _ = get_broadcaster.write().unwrap().room(&room_id).close_conn(reason, &id).await;
                     break;
                  },
                  Message::Pong(bytes) => {
                     let mut write_broadcaster = get_broadcaster.write().unwrap();
 
-                    write_broadcaster.room(room_id.clone()).ping(bytes.to_vec()).await;
+                    write_broadcaster.room(&room_id).ping(bytes.to_vec()).await;
                  },
                  Message::Ping(bytes) => {
                     let mut write_broadcaster = get_broadcaster.write().unwrap();
 
-                    write_broadcaster.room(room_id.clone()).pong(bytes.to_vec()).await;
+                    write_broadcaster.room(&room_id).pong(bytes.to_vec()).await;
                  },
                  Message::Continuation(item) => {
                     let mut write_broadcaster = get_broadcaster.write().unwrap();
 
-                    let room = write_broadcaster.room(room_id.clone());
+                    let room = write_broadcaster.room(&room_id);
 
                     let msg = format!(r"hello, your continuation message: {:#?}", item);
                     

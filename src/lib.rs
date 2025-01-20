@@ -50,14 +50,14 @@ impl Connection {
 
 impl Room {
     /// checks if a connection with given id exist and if it's not add a connection with given id and Session to a room.
-    pub fn add_connection(&mut self, id: String, session: Session) {
-        let check_is_connection_exist = self.connectors.iter().any(|room| room.id == id);
+    pub fn add_connection(&mut self, id: &String, session: Session) {
+        let check_is_connection_exist = self.connectors.iter().any(|room| room.id == *id);
 
         match check_is_connection_exist {
             true => (),
             false => {
                 let connection = Connection {
-                    id,
+                    id: id.clone(),
                     session
                 };
 
@@ -297,6 +297,23 @@ impl Room {
         } 
     }
 
+    /// closes the connection with given id and removes it from it's room.
+    pub async fn close_conn(&mut self, reason: Option<CloseReason>, id: &String) {
+        self.connectors.retain(|conn| {
+            if conn.id == *id {
+                let reason = reason.clone();
+                    
+                let _ = async {
+                    let _ = conn.session.clone().close(reason).await;
+                };
+        
+                false
+            } else {
+                true
+            }
+        });
+    }
+
     /// closes all the connections and entire room. Warning: it's a private function, if you want to close all the connections directly, use the `.remove_room()` method of the Broadcaster struct instead.
     pub async fn close(&mut self, reason: Option<CloseReason>) {
         self.connectors.retain(|conn| {
@@ -359,10 +376,10 @@ impl Broadcaster {
     /// let id = query.id.as_ref().unwrap().to_string();
     /// let room_id = query.room.as_ref().unwrap().to_string();
     ///
-    /// let get_broadcaster = Broadcaster::handle(&broadcaster, room_id.clone(), id.clone(), session);
+    /// let get_broadcaster = Broadcaster::handle(&broadcaster, &room_id, &id, session);
     /// 
     ///```
-    pub fn handle(broadcaster: &Arc<RwLock<Self>>, room_id: String, conn_id: String, session: Session) -> Arc<RwLock<Self>> {
+    pub fn handle(broadcaster: &Arc<RwLock<Self>>, room_id: &String, conn_id: &String, session: Session) -> Arc<RwLock<Self>> {
         let mut broadcaster_write = broadcaster.write().unwrap();
 
         broadcaster_write.handle_room(room_id).add_connection(conn_id, session);
@@ -375,18 +392,20 @@ impl Broadcaster {
     ///```rust
     /// 
     /// let mut broadcaster_write = broadcaster.write().unwrap();
+    /// 
+    /// let room_id = "1".to_string();
     ///
-    /// broadcaster_write.handle_room(room_id)
+    /// broadcaster_write.handle_room(&room_id)
     /// 
     ///```
     /// 
-    pub fn handle_room(&mut self, id: String) -> &mut Room {
-        if let Some(index) = self.rooms.iter().position(|room| room.id == id) {
+    pub fn handle_room(&mut self, id: &String) -> &mut Room {
+        if let Some(index) = self.rooms.iter().position(|room| room.id == *id) {
             return &mut self.rooms[index];
         }
     
         self.rooms.push(Room {
-            id,
+            id: id.clone(),
             connectors: vec![],
         });
     
@@ -394,7 +413,7 @@ impl Broadcaster {
     }
 
     /// it scans a room with given id and it returns it if it's exist. if there is a risk that room isn't exist than use ".check_room()"
-    pub fn room(&mut self, id: String) -> &mut Room {
+    pub fn room(&mut self, id: &String) -> &mut Room {
         return self.rooms.iter_mut().find(|room| room.id == *id).unwrap();
     }
 
@@ -423,7 +442,7 @@ impl Broadcaster {
     ///     // let _ = get_broadcaster.write().unwrap().remove_room(room_id.clone()).await;
     ///
     ///     let _ = get_broadcaster.write().unwrap()
-    ///                                    .room(room_id.clone())
+    ///                                    .room(&room_id)
     ///                                    .close_if(reason, |conn| conn.id == query.id.clone().unwrap()).await;
     ///                
     ///     break;
