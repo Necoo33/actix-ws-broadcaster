@@ -443,7 +443,7 @@ impl Broadcaster {
     ///
     ///     let _ = get_broadcaster.write().unwrap()
     ///                                    .room(&room_id)
-    ///                                    .close_if(reason, |conn| conn.id == query.id.clone().unwrap()).await;
+    ///                                    .close_if(reason, |conn| conn.id == *id).await;
     ///                
     ///     break;
     ///  },

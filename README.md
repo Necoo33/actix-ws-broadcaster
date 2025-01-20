@@ -12,7 +12,7 @@ Add that line to your `Cargo.toml` file:
 
 ```toml
 
-actix-ws-broadcaster = "0.1.0"
+actix-ws-broadcaster = "0.7.1"
 
 ```
 
@@ -52,7 +52,7 @@ let (response, session, mut msg_stream) = actix_ws::handle(&req, body)?;
 
 // the room_id and connection_id has to be string:
 
-let broadcaster = Broadcaster::handle(&broadcaster, room_id, connection_id, session);
+let broadcaster = Broadcaster::handle(&broadcaster, &room_id, &connection_id, session);
 
 ```
 
@@ -70,7 +70,7 @@ Message::Text(msg) => {
     let mut writeable_broadcaster = broadcaster.write().unwrap();
 
     // broadcast it.
-    writeable_broadcaster.room(room_id).broadcast(msg.to_string()).await;
+    writeable_broadcaster.room(&room_id).broadcast(msg.to_string()).await;
 }
 
 ```
@@ -85,7 +85,7 @@ per each connection, broadcastes the message.
 
 // broadcast for all:
 
-writeable_broadcaster.room(room_id).broadcast_if(msg.to_string(), |connection| true).await;
+writeable_broadcaster.room(&room_id).broadcast_if(msg.to_string(), |connection| true).await;
 
 ```
 
@@ -96,7 +96,7 @@ broadcastes if given condition is false:
 
 // broadcast for all:
 
-writeable_broadcaster.room(room_id).broadcast_if_not(msg.to_string(), |connection| false).await;
+writeable_broadcaster.room(&room_id).broadcast_if_not(msg.to_string(), |connection| false).await;
 
 ```
 
@@ -108,10 +108,13 @@ If a client disconnects, you should remove their assigned connection by that cod
 
 Message::Close(reason) => {
     // warning, that closes and removes all the connections but not removes the room: 
-    let _ = get_broadcaster.write().unwrap().room(room_id.clone()).close(reason).await;
+    let _ = get_broadcaster.write().unwrap().room(&room_id).close(reason).await;
 
     // if you want to remove a room with removing all the connections, use this instead:
-    let _ = get_broadcaster.write().unwrap().remove_room(room_id.clone()).await;
+    let _ = get_broadcaster.write().unwrap().remove_room(&room_id).await;
+
+    // if you want to remove a single connection with given id, use this:
+    let _ = get_broadcaster.write().unwrap().room(&room_id).close_conn(reason, &id).await;
 
     // warning, this is the old and deprecated way:
     let _ = broadcaster.write().unwrap().remove_connection(id).unwrap().close(reason).await;
