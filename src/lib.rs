@@ -297,7 +297,17 @@ impl Room {
         } 
     }
 
-    /// closes the connection with given id and removes it from it's room.
+    /// closes the connection with given id and removes it from it's room. This is the convenient way of closing a connection.
+    /// 
+    /// ```rust
+    /// 
+    /// Message::Close(reason) => {
+    ///     let _ = get_broadcaster.write().unwrap().room(&room_id).close_conn(reason, &id).await;
+    /// 
+    ///     break;
+    /// },
+    /// 
+    /// ```
     pub async fn close_conn(&mut self, reason: Option<CloseReason>, id: &String) {
         self.connectors.retain(|conn| {
             if conn.id == *id {
@@ -314,7 +324,7 @@ impl Room {
         });
     }
 
-    /// closes all the connections and entire room. Warning: it's a private function, if you want to close all the connections directly, use the `.remove_room()` method of the Broadcaster struct instead.
+    /// closes all the connections and entire room. Warning: it closes all connections but keeps room open, if you want to close all the connections directly, use the `.remove_room()` method of the Broadcaster struct instead.
     pub async fn close(&mut self, reason: Option<CloseReason>) {
         self.connectors.retain(|conn| {
             let reason = reason.clone();
@@ -327,7 +337,7 @@ impl Room {
         });
     }
     
-    /// closes the connection and removes it from room if given condition for connection instances is true.
+    /// closes the connection and removes it from room if given condition for connection instances is true. Room still stay open.
     pub async fn close_if<F>(&mut self, reason: Option<CloseReason>, condition: F) where F: Fn(&Connection) -> bool { 
         self.connectors.retain(|connection| {
             if condition(connection) {
@@ -344,7 +354,7 @@ impl Room {
         });
     }
     
-    /// closes the connection and removes it from room if given condition for connection instances is false.
+    /// closes the connection and removes it from room if given condition for connection instances is false. Room still stay open.
     pub async fn close_if_not<F>(&mut self, reason: Option<CloseReason>, condition: F) where F: Fn(&Connection) -> bool { 
         self.connectors.retain(|connection| {
             if !condition(connection) {
@@ -425,7 +435,7 @@ impl Broadcaster {
         }
     }
 
-    /// it returns room if exist with given ip. Use .handle_room() method if you want to create a room with given ip.
+    /// it returns room if exist with given ip. Use .handle_room() method if you want to create a room with given id.
     pub fn check(&self, id: &String) -> bool {
         return self.rooms.iter().any(|room| room.id == *id);
     }
@@ -496,7 +506,7 @@ impl Broadcaster {
     ///
     ///     let _ = get_broadcaster.write().unwrap()
     ///                                    .room(&room_id)
-    ///                                    .close_if(reason, |conn| conn.id == *id).await;
+    ///                                    .remove_room(reason, |conn| conn.id == *id).await;
     ///                
     ///     break;
     ///  },
