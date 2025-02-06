@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.8.0
+
+Added `.each_room_immut()`, `.each_room()` and `.each_room_mut()` methods to the `Broadcaster` type. They benefits to iterate through rooms with slight nuances.
+
 ## v0.7.1
 
 Documentation update. All the documentation reviewed and updated depending on most recent api.

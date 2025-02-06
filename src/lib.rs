@@ -430,6 +430,59 @@ impl Broadcaster {
         return self.rooms.iter().any(|room| room.id == *id);
     }
 
+    /// iterates through every room and does something with them immutably. You cannot mutate anything inside of it, even rooms and not captured variables.      
+    /// 
+    /// ```rust
+    /// 
+    /// use actix_wsb::Broadcaster;
+    /// 
+    /// fn main () {
+    ///     let broadcaster = Broadcaster::new();
+    /// 
+    ///     broadcaster.read().unwrap().each_room_immut(|room| println!("hello, {}. guest!", room.id));
+    /// }
+    /// 
+    /// 
+    /// ```
+    pub fn each_room_immut<F>(&self, f: F) where F: Fn(&Room) {
+        for room in &self.rooms {
+            f(room);
+        }
+    }
+    
+    /// iterates through every room and does something with them immutably. You cannot mutate rooms itself but can mutate captured variables.
+    /// 
+    /// ```rust
+    /// 
+    /// use actix_wsb::Broadcaster;
+    /// 
+    /// fn main () {
+    ///     let broadcaster = Broadcaster::new();
+    /// 
+    ///     let mut num = 0;
+    /// 
+    ///     broadcaster.read().unwrap().each_room(|room| {
+    ///         num = num + 1;
+    ///     });
+    /// 
+    ///     println!("here is number: {}", num)
+    /// }
+    /// 
+    /// 
+    /// ```
+    pub fn each_room<F>(&self, mut f: F) where F: FnMut(&Room) {
+        for room in &self.rooms {
+            f(room);
+        }
+    }
+
+    /// iterates through every room and does something with them mutably. You can mutate everything belong to it. But warning, for now, you cannot send messages to client from it right now and until async closures will be stable probably we're not be able to do it. Because of that, we're not able to give examples for that.
+    pub async fn each_room_mut<F>(&mut self, mut f: F) where F: FnMut(&mut Room) {
+        for room in &mut self.rooms {
+            f(room);
+        }
+    }
+
     /// it removes a room with given id.
     /// 
     /// 

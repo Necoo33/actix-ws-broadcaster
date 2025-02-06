@@ -52,6 +52,18 @@ pub async fn websocket_controller(req: HttpRequest, body: Payload, broadcaster: 
     let room_id = query.room.as_ref().unwrap().to_string();
 
     let get_broadcaster = Broadcaster::handle(&broadcaster, &room_id, &id, session);
+
+    // ".each_room_immut()" example
+    get_broadcaster.read().unwrap().each_room_immut(|room| println!("Hello to room {}!", room.id));
+    
+    // ".each_room()" example
+    let mut num = 0;
+    
+    get_broadcaster.read().unwrap().each_room(|room| {
+        for _ in room.connectors.iter() {
+            num = num + 1
+        }
+    });
     
     spawn(async move {
         while let Some(Ok(msg)) = msg_stream.recv().await {
