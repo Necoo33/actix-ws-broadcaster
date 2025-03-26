@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.9.0
+
+Added `.ping()`, `.ping_if()` and `.ping_if_not()` methods to the `Connection` type. Which benefits to send ping messages to client from connection directly.
+
 ## v0.8.1
 
 Documentation updates. Documentation of some of the methods are revised and improved.

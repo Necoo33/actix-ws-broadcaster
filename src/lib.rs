@@ -46,6 +46,25 @@ impl Connection {
             self.session.text(message).await.unwrap();
         }
     }
+
+    /// sends a ping message from single connection.
+    pub async fn ping(&mut self, bytes: &Vec<u8>) -> () {
+        self.session.ping(bytes).await.unwrap();
+    }
+
+    /// sends a ping message from single connection if given condition is true.
+    pub async fn ping_if<F>(&mut self, bytes: &Vec<u8>, condition: F) where F: Fn(&Connection) -> bool {
+        if condition(&self) {
+            self.session.ping(bytes).await.unwrap();
+        }
+    }
+
+    /// */ sends a ping message from single connection if given condition is false.
+    pub async fn ping_if_not<F>(&mut self, bytes: &Vec<u8>, condition: F) where F: Fn(&Connection) -> bool {
+        if !condition(&self) {
+            self.session.ping(bytes).await.unwrap();
+        }
+    }
 }
 
 impl Room {

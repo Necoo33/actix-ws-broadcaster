@@ -12,7 +12,7 @@ Add that line to your `Cargo.toml` file:
 
 ```toml
 
-actix-ws-broadcaster = "0.7.1"
+actix-ws-broadcaster = "0.9.0"
 
 ```
 
