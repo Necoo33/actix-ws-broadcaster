@@ -66,19 +66,19 @@ impl Connection {
         }
     }
 
-        /// sends a ping message from single connection.
+    /// sends a pong message from single connection.
     pub async fn pong(&mut self, bytes: &Vec<u8>) -> () {
         self.session.pong(bytes).await.unwrap();
     }
 
-    /// sends a ping message from single connection if given condition is true.
+    /// sends a pong message from single connection if given condition is true.
     pub async fn pong_if<F>(&mut self, bytes: &Vec<u8>, condition: F) where F: Fn(&Connection) -> bool {
         if condition(&self) {
             self.session.pong(bytes).await.unwrap();
         }
     }
 
-    /// */ sends a ping message from single connection if given condition is false.
+    /// */ sends a pong message from single connection if given condition is false.
     pub async fn pong_if_not<F>(&mut self, bytes: &Vec<u8>, condition: F) where F: Fn(&Connection) -> bool {
         if !condition(&self) {
             self.session.pong(bytes).await.unwrap();
