@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.10.0
+
+`actix-web` version updated to v4.10.2 and `serde` version updated to v1.0.219 .
+Added `.pong()`, `.pong_if()` and `.pong_if_not()` methods to the `Connection` type. Which benefits to send ping messages to client from connection directly.
+
 ## v0.9.0
 
 Added `.ping()`, `.ping_if()` and `.ping_if_not()` methods to the `Connection` type. Which benefits to send ping messages to client from connection directly.
