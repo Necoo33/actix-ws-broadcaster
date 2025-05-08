@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.11.0
+
+Added `.binary()`, `.binary_if()` and `.binary_if_not()` methods to the `Connection` type.
+
 ## v0.10.0
 
 `actix-web` version updated to v4.10.2 and `serde` version updated to v1.0.219 .
