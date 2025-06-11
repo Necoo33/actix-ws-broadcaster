@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.12.0
+
+Actix-Web version is upgraded to 4.11.0 .
+Added `.continuation()`, `.continuation_if()` and `.continuation_if_not()` methods to the `Connection` type.
+
 ## v0.11.0
 
 Added `.binary()`, `.binary_if()` and `.binary_if_not()` methods to the `Connection` type.

@@ -103,6 +103,76 @@ impl Connection {
             self.session.binary(bytes).await.unwrap();
         }
     }
+
+    /// sends a continuation message from single connection with given type.
+    pub async fn continuation(&mut self, item: Item) -> () {
+        match item {
+            Item::FirstText(ref text) => {
+                let text = text;
+                self.session.continuation(Item::FirstText(text.clone())).await.unwrap()
+            },
+            Item::FirstBinary(ref binary) => {
+                let binary = binary;
+                self.session.continuation(Item::FirstBinary(binary.clone())).await.unwrap()
+            },
+            Item::Continue(ref cont_msg) => {
+                let cont_msg = cont_msg;
+                self.session.continuation(Item::Continue(cont_msg.clone())).await.unwrap()
+            },
+            Item::Last(ref last_msg) => {
+                let last_msg = last_msg;
+                self.session.continuation(Item::Last(last_msg.clone())).await.unwrap()
+            }
+        }
+    }
+
+    /// sends a continuation message from single connection with given type if given condition is true.
+    pub async fn continuation_if<F>(&mut self, item: Item, condition: F) where F: Fn(&Connection) -> bool { 
+        if condition(&self) { 
+            match item {
+                Item::FirstText(ref text) => {
+                    let text = text;
+                    self.session.continuation(Item::FirstText(text.clone())).await.unwrap()
+                },
+                Item::FirstBinary(ref binary) => {
+                    let binary = binary;
+                    self.session.continuation(Item::FirstBinary(binary.clone())).await.unwrap()
+                },
+                Item::Continue(ref cont_msg) => {
+                    let cont_msg = cont_msg;
+                    self.session.continuation(Item::Continue(cont_msg.clone())).await.unwrap()
+                },
+                Item::Last(ref last_msg) => {
+                    let last_msg = last_msg;
+                    self.session.continuation(Item::Last(last_msg.clone())).await.unwrap()
+                }
+            }
+        } 
+    }
+
+    /// sends a continuation message from single connection with given type if given condition is false.
+    pub async fn continuation_if_not<F>(&mut self, item: Item, condition: F) where F: Fn(&Connection) -> bool { 
+        if !condition(&self) { 
+            match item {
+                Item::FirstText(ref text) => {
+                    let text = text;
+                    self.session.continuation(Item::FirstText(text.clone())).await.unwrap()
+                },
+                Item::FirstBinary(ref binary) => {
+                    let binary = binary;
+                    self.session.continuation(Item::FirstBinary(binary.clone())).await.unwrap()
+                },
+                Item::Continue(ref cont_msg) => {
+                    let cont_msg = cont_msg;
+                    self.session.continuation(Item::Continue(cont_msg.clone())).await.unwrap()
+                },
+                Item::Last(ref last_msg) => {
+                    let last_msg = last_msg;
+                    self.session.continuation(Item::Last(last_msg.clone())).await.unwrap()
+                }
+            }
+        } 
+    }
 }
 
 impl Room {
